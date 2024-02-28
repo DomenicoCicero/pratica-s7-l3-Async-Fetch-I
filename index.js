@@ -1,5 +1,5 @@
-const arrCarrello = [];
 const localStorageKey = "carrello";
+const arrCarrello = JSON.parse(localStorage.getItem(localStorageKey)) || [];
 
 fetch("https://striveschool-api.herokuapp.com/books")
   .then(response => {
@@ -126,14 +126,14 @@ fetch("https://striveschool-api.herokuapp.com/books")
         localStorage.setItem(localStorageKey, JSON.stringify(arrCarrello));
         console.log(arrCarrello);
 
-        // let totalPrice = 0;
-        // for (let i = 0; i < arrCarrello.length; i++) {
-        //   let price = arrCarrello[i].price;
-        //   totalPrice += price;
-        // }
-        // const h4 = document.querySelector("h4");
-        // h4.innerText = totalPrice;
-        // console.log(totalPrice);
+        let totalPrice = 0;
+        for (let i = 0; i < arrCarrello.length; i++) {
+          let price = arrCarrello[i].price;
+          totalPrice += price;
+        }
+        const h4 = document.querySelector("h4");
+        h4.innerText = totalPrice;
+        console.log(totalPrice);
 
         eliminaBtn.addEventListener("click", e => {
           e.target.parentNode.parentNode.remove();
@@ -141,6 +141,10 @@ fetch("https://striveschool-api.herokuapp.com/books")
           for (let i = 0; i < arrCarrello.length; i++) {
             if (arrCarrello[i].asin === element.asin) {
               arrCarrello.splice(i, 1);
+
+              h4.innerText = "";
+              //   totalPrice - element.price;
+              h4.innerText = totalPrice - element.price;
             }
           }
           localStorage.setItem(localStorageKey, JSON.stringify(arrCarrello));
@@ -150,3 +154,61 @@ fetch("https://striveschool-api.herokuapp.com/books")
     });
   })
   .catch(error => console.log(error));
+
+const generateCar = element => {
+  const divCarrello = document.querySelector(".carrello");
+  const ul = document.querySelector(".carrello ul");
+
+  const li = document.createElement("li");
+  const divLi = document.createElement("div");
+  divLi.classList.add("position-relative");
+  divLi.style = "height: 400px; width:200px; margin-block-end: 20px; border: 1px solid black";
+
+  const imgCarrello = document.createElement("img");
+  imgCarrello.src = element.img;
+  imgCarrello.style = "width: 100%; height:60%; object-fit: cover";
+
+  const titleCarrello = document.createElement("h5");
+  titleCarrello.innerText = element.title;
+
+  const priceCarrello = document.createElement("p");
+  priceCarrello.innerText = `${element.price}$`;
+
+  const eliminaBtn = document.createElement("button");
+  eliminaBtn.type = "button";
+  eliminaBtn.classList.add("btn");
+  eliminaBtn.classList.add("btn-primary");
+  eliminaBtn.classList.add("bg-danger");
+  eliminaBtn.classList.add("border");
+  eliminaBtn.classList.add("position-absolute");
+  eliminaBtn.classList.add("start-0");
+  eliminaBtn.classList.add("bottom-0");
+  eliminaBtn.classList.add("ms-0");
+  eliminaBtn.classList.add("mb-0");
+  eliminaBtn.innerText = "Elimina";
+
+  divLi.appendChild(imgCarrello);
+  divLi.appendChild(titleCarrello);
+  divLi.appendChild(priceCarrello);
+  divLi.appendChild(eliminaBtn);
+
+  li.appendChild(divLi);
+  ul.appendChild(li);
+
+  eliminaBtn.addEventListener("click", e => {
+    e.target.parentNode.parentNode.remove();
+
+    const bookIndex = arrCarrello.findIndex(book => book.asin === element.asin);
+
+    arrCarrello.splice(bookIndex, 1);
+
+    localStorage.setItem(localStorageKey, JSON.stringify(arrCarrello));
+    console.log(arrCarrello);
+  });
+};
+
+window.onload = () => {
+  for (let i = 0; i < arrCarrello.length; i++) {
+    generateCar(arrCarrello[i]);
+  }
+};
